@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useCategories } from '../lib/categoriesContext'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const NETWORKS = ['Visa', 'Mastercard', 'Amex', 'Other']
@@ -138,7 +139,93 @@ function CardFormModal({ initial, onSave, onClose }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
+const EMOJIS = ['🍜','🛍️','🚗','🎬','💊','💡','✈️','📦','🏠','🐾','🎓','💼','💻','📈','🎁','↩️','💰','🍔','☕','🏋️','💈','🎮','🌿','🛺']
+
+function CategoryManager({ categories, onAdd, onRemove, placeholder }) {
+  const [input, setInput]     = useState('')
+  const [emoji, setEmoji]     = useState('📦')
+  const [picking, setPicking] = useState(false)
+
+  function handleAdd() {
+    const label = input.trim()
+    if (!label || categories.some(c => c.label === label)) return
+    onAdd({ label, emoji })
+    setInput('')
+    setEmoji('📦')
+  }
+
+  return (
+    <div>
+      {/* Existing categories */}
+      <div className="rounded-3xl border border-[#E9D5FF] bg-white overflow-hidden mb-3">
+        {categories.length === 0 && (
+          <p className="px-4 py-4 text-sm text-[#78716C] text-center">No categories yet</p>
+        )}
+        {categories.map((cat, i) => (
+          <div key={cat.label} className={`flex items-center gap-3 px-4 py-3 ${i < categories.length - 1 ? 'border-b border-[#F3E8FF]' : ''}`}>
+            <span className="text-xl">{cat.emoji}</span>
+            <span className="flex-1 text-sm text-[#1C1917]">{cat.label}</span>
+            <button
+              onClick={() => onRemove(cat.label)}
+              className="flex h-7 w-7 items-center justify-center rounded-xl text-[#78716C] transition-colors hover:bg-[#FFF1F2] hover:text-[#E11D48]"
+            >
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Add row */}
+      <div className="flex gap-2 items-center">
+        {/* Emoji picker trigger */}
+        <div className="relative">
+          <button
+            onClick={() => setPicking(p => !p)}
+            className="flex h-[46px] w-[46px] items-center justify-center rounded-2xl border border-[#E9D5FF] bg-white text-xl transition-colors hover:border-[#C4B5FD]"
+          >
+            {emoji}
+          </button>
+          {picking && (
+            <div className="absolute bottom-full left-0 mb-2 z-30 w-56 rounded-2xl border border-[#E9D5FF] bg-white p-3 shadow-xl grid grid-cols-6 gap-1">
+              {EMOJIS.map(e => (
+                <button
+                  key={e}
+                  onClick={() => { setEmoji(e); setPicking(false) }}
+                  className={`flex h-8 w-8 items-center justify-center rounded-xl text-lg transition-colors hover:bg-[#F3E8FF] ${emoji === e ? 'bg-[#F3E8FF]' : ''}`}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <input
+          type="text"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          placeholder={placeholder}
+          className="flex-1 rounded-2xl border border-[#E9D5FF] bg-white px-4 py-3 text-sm text-[#1C1917] placeholder-[#C4B5FD]/50 outline-none focus:border-[#C4B5FD] focus:ring-2 focus:ring-[#C4B5FD]/20"
+        />
+        <button
+          onClick={handleAdd}
+          disabled={!input.trim()}
+          className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-2xl bg-[#C4B5FD] text-white shadow-sm transition-all hover:bg-[#a78bfa] disabled:opacity-40"
+        >
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function Settings() {
+  const { expenseCategories, incomeCategories, addExpense, removeExpense, addIncome, removeIncome } = useCategories()
   const [cards, setCards]           = useState(INITIAL_CARDS)
   const [modal, setModal]           = useState(null) // null | 'add' | Card (editing)
   const [confirmDelete, setConfirm] = useState(null) // card id pending delete
@@ -258,6 +345,28 @@ export default function Settings() {
             Add a card
           </button>
         </div>
+      </div>
+
+      {/* ── Expense categories ── */}
+      <div>
+        <SectionHeader title="Expense Categories" />
+        <CategoryManager
+          categories={expenseCategories}
+          onAdd={addExpense}
+          onRemove={removeExpense}
+          placeholder="New category name…"
+        />
+      </div>
+
+      {/* ── Income categories ── */}
+      <div>
+        <SectionHeader title="Income Categories" />
+        <CategoryManager
+          categories={incomeCategories}
+          onAdd={addIncome}
+          onRemove={removeIncome}
+          placeholder="New category name…"
+        />
       </div>
 
       {/* ── Preferences ── */}

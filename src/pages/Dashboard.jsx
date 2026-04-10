@@ -4,11 +4,10 @@ import { PieChart, Pie, Tooltip, ResponsiveContainer } from 'recharts'
 
 // ── Dummy data per period ─────────────────────────────────────────────────────
 const PERIOD_DATA = {
-  Daily:   { expenses: 94,   income: 0,     priorExpenses: 112,  label: 'Today',        priorLabel: 'yesterday'    },
-  Weekly:  { expenses: 387,  income: 500,   priorExpenses: 310,  label: 'This week',    priorLabel: 'last week'    },
-  Monthly: { expenses: 1122, income: 4200,  priorExpenses: 888,  label: 'April 2026',   priorLabel: 'last month'   },
-  Yearly:  { expenses: 8740, income: 52000, priorExpenses: 7200, label: 'This year',    priorLabel: 'last year'    },
-  Custom:  { expenses: 540,  income: 1000,  priorExpenses: 490,  label: 'Custom range', priorLabel: 'prior period' },
+  Daily:   { expenses: 94,   income: 0,     priorExpenses: 112,  label: 'Today',        priorLabel: 'yesterday'  },
+  Weekly:  { expenses: 387,  income: 500,   priorExpenses: 310,  label: 'This week',    priorLabel: 'last week'  },
+  Monthly: { expenses: 1122, income: 4200,  priorExpenses: 888,  label: 'April 2026',   priorLabel: 'last month' },
+  Yearly:  { expenses: 8740, income: 52000, priorExpenses: 7200, label: 'This year',    priorLabel: 'last year'  },
 }
 
 const CATEGORY_DATA = [
@@ -35,7 +34,7 @@ const RECENT = [
   { id: 5, emoji: '🎬', name: 'Netflix',         category: 'Entertainment',    date: 'Apr 4', amount: 15.99  },
 ]
 
-const PERIODS = ['Daily', 'Weekly', 'Monthly', 'Yearly', 'Custom']
+const PERIODS = ['Daily', 'Weekly', 'Monthly', 'Yearly']
 
 // ── Custom tooltip ────────────────────────────────────────────────────────────
 function ChartTooltip({ active, payload }) {
@@ -80,15 +79,15 @@ export default function Dashboard() {
       </div>
 
       {/* ── Period tabs ── */}
-      <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+      <div className="grid grid-cols-4 gap-1 rounded-2xl border border-[#E9D5FF] bg-white p-1">
         {PERIODS.map(p => (
           <button
             key={p}
             onClick={() => setPeriod(p)}
-            className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
+            className={`rounded-xl py-2 text-[11px] font-semibold transition-all ${
               period === p
                 ? 'bg-[#C4B5FD] text-white shadow-sm'
-                : 'border border-[#E9D5FF] bg-white text-[#78716C] hover:border-[#C4B5FD] hover:text-[#1C1917]'
+                : 'text-[#78716C] hover:text-[#1C1917]'
             }`}
           >
             {p}

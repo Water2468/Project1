@@ -1,26 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-// ── Dummy data ────────────────────────────────────────────────────────────────
-const EXPENSE_CATEGORIES = [
-  { label: 'Food & Dining',    emoji: '🍜' },
-  { label: 'Shopping',         emoji: '🛍️' },
-  { label: 'Transportation',   emoji: '🚗' },
-  { label: 'Entertainment',    emoji: '🎬' },
-  { label: 'Health & Fitness', emoji: '💊' },
-  { label: 'Bills & Utilities',emoji: '💡' },
-  { label: 'Travel',           emoji: '✈️' },
-  { label: 'Other',            emoji: '📦' },
-]
-
-const INCOME_CATEGORIES = [
-  { label: 'Salary',     emoji: '💼' },
-  { label: 'Freelance',  emoji: '💻' },
-  { label: 'Investment', emoji: '📈' },
-  { label: 'Gift',       emoji: '🎁' },
-  { label: 'Refund',     emoji: '↩️' },
-  { label: 'Other',      emoji: '💰' },
-]
+import { useCategories } from '../lib/categoriesContext'
 
 const CREDIT_CARDS = [
   { label: 'Chase Sapphire',   network: 'Visa'   },
@@ -72,9 +52,10 @@ const PAD_KEYS = ['7','8','9','4','5','6','1','2','3','.','0','⌫']
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function QuickAdd() {
   const navigate = useNavigate()
+  const { expenseCategories, incomeCategories } = useCategories()
   const [type, setType]             = useState('expense')
   const [raw, setRaw]               = useState('0')
-  const [category, setCategory]     = useState(EXPENSE_CATEGORIES[0])
+  const [category, setCategory]     = useState(null)
   const [payMethod, setPayMethod]   = useState('Cash')
   const [creditCard, setCreditCard] = useState(CREDIT_CARDS[0])
   const [note, setNote]             = useState('')
@@ -83,12 +64,13 @@ export default function QuickAdd() {
   const [cardOpen, setCardOpen]     = useState(false)
 
   const isExpense   = type === 'expense'
-  const categories  = isExpense ? EXPENSE_CATEGORIES : INCOME_CATEGORIES
+  const categories  = isExpense ? expenseCategories : incomeCategories
+  const activeCategory = category ?? categories[0] ?? { label: 'Other', emoji: '📦' }
   const accentColor = isExpense ? '#C4B5FD' : '#86EFAC'
 
   function switchType(t) {
     setType(t)
-    setCategory(t === 'expense' ? EXPENSE_CATEGORIES[0] : INCOME_CATEGORIES[0])
+    setCategory(null)
     setCatOpen(false)
     setCardOpen(false)
   }
@@ -169,13 +151,13 @@ export default function QuickAdd() {
             onClick={() => { setCatOpen(o => !o); setCardOpen(false) }}
             className="flex items-center gap-1.5 rounded-full border border-[#E9D5FF] bg-white px-4 py-2 text-sm font-medium text-[#1C1917] shadow-sm transition-colors hover:border-[#C4B5FD]"
           >
-            <span>{category.emoji}</span>
-            <span>{category.label}</span>
+            <span>{activeCategory.emoji}</span>
+            <span>{activeCategory.label}</span>
             <svg className="ml-1 h-3 w-3 text-[#C4B5FD]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          <Picker options={categories} selected={category} onSelect={setCategory} open={catOpen} onClose={() => setCatOpen(false)} />
+          <Picker options={categories} selected={activeCategory} onSelect={setCategory} open={catOpen} onClose={() => setCatOpen(false)} />
         </div>
       </div>
 
